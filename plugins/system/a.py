@@ -11,5 +11,5 @@ class FirstPlugin(Plugin):
   def __init__(self):
     Plugin.__init__(self)
   
-  def scan(self, options={}):
+  def execute(self, options={}):
     return "exec function"

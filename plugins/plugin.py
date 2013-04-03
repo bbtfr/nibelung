@@ -1,4 +1,4 @@
-class Plugin:
+class Plugin(object):
   options = [{}]
   name = ''
   description = ''
@@ -7,5 +7,5 @@ class Plugin:
   def __init__(self):
     pass
   
-  def scan(self, options={}):
+  def execute(self, options={}):
     pass

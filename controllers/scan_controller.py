@@ -6,4 +6,4 @@ class ScanController:
     pluginManager.loadPlugins()
     for plug in pluginManager.plugins:
       print plug.options
-      print plug.scan()
+      print plug.execute()
