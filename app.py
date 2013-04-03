@@ -12,5 +12,4 @@ import db_seed
 login = LoginController()
 
 if login.login():
-  scan = ScanController()
-  scan.scan()
+  main = MainController()
