@@ -1,6 +1,7 @@
 from scan_controller import ScanController
 from audit_controller import AuditController
-from user_manager_controller import UserManagerController
+from access_controller import AccessController
+from config.acl import acl, identity
 
 class MainController:
   def __init__(self):
@@ -22,3 +23,6 @@ class MainController:
       controller.show()
     else:
       self.select()
+
+  def show(self):
+    pass

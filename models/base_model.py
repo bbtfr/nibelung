@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.exc import IntegrityError
 from config import session
 
@@ -27,3 +29,7 @@ class ResourceMixin(object):
     except IntegrityError, e:
       self.errors['SQL'] = e.message
       return False
+
+  @classmethod
+  def find_by(cls, **filter):
+    return session.query(cls).filter_by(**filter).first()

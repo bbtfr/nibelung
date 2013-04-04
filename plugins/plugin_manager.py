@@ -66,12 +66,13 @@ class DirectoryPluginManager(PluginManager):
   """Plugin manager that loads plugins from plugin directories.
   """
   def __init__(self, plugins=(), config={}):
-    default_directories = []
-    for d in  os.listdir(os.path.dirname(__file__)):
-      fd = os.path.join(os.path.dirname(__file__), d)
-      if os.path.isdir(fd):
-        default_directories.append(fd)
-    self.directories = config.get("directories", default_directories)
+    def default_directories(directories=[]):
+      for d in  os.listdir(os.path.dirname(__file__)):
+        fd = os.path.join(os.path.dirname(__file__), d)
+        if os.path.isdir(fd):
+          directories.append(fd)
+      return directories
+    self.directories = config.get("directories", default_directories())
     PluginManager.__init__(self, plugins, config)
 
   def loadPlugins(self):

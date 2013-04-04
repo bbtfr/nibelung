@@ -4,7 +4,6 @@ __all__ = ["FirstPlugin"]
 
 class FirstPlugin(Plugin):
   
-  name = "firstPlugin"
   description = ""
   version = '0.0.1'
 
@@ -12,4 +11,4 @@ class FirstPlugin(Plugin):
     Plugin.__init__(self)
   
   def execute(self, options={}):
-    return "exec function"
+    return [{'severity':0, 'message':'exec function'}]

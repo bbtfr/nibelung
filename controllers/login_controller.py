@@ -7,3 +7,6 @@ class LoginController:
     password = getpass('Password:')
     user = User.find_by_username(username)
     return user and user.authenticate(password)
+
+  def show(self):
+    pass

@@ -1,13 +1,6 @@
 #coding=utf-8
 
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import validates
-from sqlalchemy.ext.hybrid import hybrid_property
-from base_model import BaseModel, ResourceMixin
-from config import session
-from rbac.acl import Registry
-from rbac.proxy import RegistryProxy
-from rbac.context import IdentityContext, PermissionDenied
+from base_model import *
 
 class User(BaseModel, ResourceMixin):
   """User Model"""
@@ -20,31 +13,36 @@ class User(BaseModel, ResourceMixin):
   salt = Column(String(10), nullable=False)
   _roles = Column('roles', String, nullable=False, default="")
 
-  @hybrid_property
-  def roles(self):
-    if self._roles: return self._roles.split(",")
-    else: return []
-
-  @roles.setter
-  def set_roles(self, roles):
-    if type(roles) == str: self._roles = roles
-    elif type(roles) == list: self._roles = ",".join(roles)
+  def roles():
+    doc = "The roles property."
+    def fget(self):
+      if self._roles: return self._roles.split(",")
+      else: return []
+    def fset(self, value):
+      if type(value) == str: self._roles = value
+      elif type(value) == list: self._roles = ",".join(value)
+    return locals()
+  roles = property(**roles())
 
   def authenticate(self, password):
     if not self.salt: return False
-    return make_password(password, self.salt) == self.password
+    if make_password(password, self.salt) == self.password:
+      self.__class__._current_user = self
+      return True
+    else:
+      return False
 
   @validates('username')
   def validate_username(self, key, value):
-    if not value: self.errors[key] = '不能为空'
-    elif len(value) < 5: self.errors[key] = '至少5个字符'
+    if not value: self.errors[key] = u'不能为空'
+    elif len(value) < 5: self.errors[key] = u'至少5个字符'
     elif key in self.errors: del self.errors[key]
     return value
 
   @validates('password')
   def validate_password(self, key, value):
-    if not value: self.errors[key] = '不能为空'
-    elif len(value) < 6: self.errors[key] = '至少6个字符'
+    if not value: self.errors[key] = u'不能为空'
+    elif len(value) < 6: self.errors[key] = u'至少6个字符'
     elif key in self.errors: del self.errors[key]
     return value
 
@@ -56,7 +54,11 @@ class User(BaseModel, ResourceMixin):
   # querying
   @classmethod
   def find_by_username(cls, username):
-    return session.query(cls).filter_by(username = username).first()
+    return cls.find_by(username=username)
+
+  @classmethod
+  def current_user(cls):
+    return cls._current_user
 
 import hashlib, uuid
 def random_characters(length):
