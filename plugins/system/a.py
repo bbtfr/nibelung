@@ -1,4 +1,4 @@
-from plugins.plugin import Plugin
+from lib.plugin import Plugin
 
 __all__ = ["FirstPlugin"]
 

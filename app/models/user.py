@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from base_model import *
+from lib.base_model import *
 
 class User(BaseModel, ResourceMixin):
   """User Model"""

@@ -2,7 +2,6 @@
 #coding=utf-8
 
 from config import engine, session
-from plugins import *
 from controllers.login_controller import LoginController
 from controllers.main_controller import MainController
 

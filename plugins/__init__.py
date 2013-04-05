@@ -1,2 +1,0 @@
-from plugin_manager import DirectoryPluginManager
-from plugin import Plugin

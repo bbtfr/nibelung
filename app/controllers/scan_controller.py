@@ -1,5 +1,5 @@
 from datetime import datetime
-from plugins.plugin_manager import DirectoryPluginManager
+from plugin_manager import DirectoryPluginManager
 from models import *
 
 class ScanController:

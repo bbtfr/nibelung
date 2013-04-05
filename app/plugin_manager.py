@@ -1,4 +1,4 @@
-from plugin import Plugin
+from lib.plugin import Plugin
 from imp import find_module, load_module, acquire_lock, release_lock
 import os
 import sys
@@ -67,10 +67,11 @@ class DirectoryPluginManager(PluginManager):
   """
   def __init__(self, plugins=(), config={}):
     def default_directories(directories=[]):
-      for d in  os.listdir(os.path.dirname(__file__)):
-        fd = os.path.join(os.path.dirname(__file__), d)
-        if os.path.isdir(fd):
-          directories.append(fd)
+      plugins_dir = os.path.join(os.path.dirname(__file__), '..', 'plugins')
+      for d in os.listdir(plugins_dir):
+        pd = os.path.join(plugins_dir, d)
+        if os.path.isdir(pd):
+          directories.append(pd)
       return directories
     self.directories = config.get("directories", default_directories())
     PluginManager.__init__(self, plugins, config)

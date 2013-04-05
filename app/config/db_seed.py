@@ -1,3 +1,4 @@
+from lib.base_model import BaseModel
 from models import *
 from config import engine
 
