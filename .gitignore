@@ -1,6 +1,6 @@
 *.pyc
 *.pyo
 *.egg-info
+*.db
 build/
 dist/
-build.sh

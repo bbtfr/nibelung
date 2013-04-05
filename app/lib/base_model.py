@@ -19,16 +19,20 @@ class ResourceMixin(object):
 
   errors = {}
   def save(self):
+    self.before_save()
     try:
       if 'SQL' in self.errors: del self.errors['SQL']
       if len(self.errors) > 0: return False
-      self.before_save()
       session.add(self)
       session.commit()
       return True
     except IntegrityError, e:
       self.errors['SQL'] = e.message
       return False
+
+  @classmethod
+  def all(cls):
+    return session.query(cls).all()
 
   @classmethod
   def find_by(cls, **filter):

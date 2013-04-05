@@ -12,6 +12,7 @@ class User(BaseModel, ResourceMixin):
   password = Column(String(128), nullable=False)
   salt = Column(String(10), nullable=False)
   _roles = Column('roles', String, nullable=False, default="")
+  _current_user = None
 
   def roles():
     doc = "The roles property."
@@ -36,6 +37,7 @@ class User(BaseModel, ResourceMixin):
   def validate_username(self, key, value):
     if not value: self.errors[key] = u'不能为空'
     elif len(value) < 5: self.errors[key] = u'至少5个字符'
+    elif User.find_by_username(value) != None: self.errors[key] = u'用户%s已存在' % value
     elif key in self.errors: del self.errors[key]
     return value
 
