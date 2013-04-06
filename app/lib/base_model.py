@@ -30,6 +30,15 @@ class ResourceMixin(object):
       self.errors['SQL'] = e.message
       return False
 
+  def destroy(self):
+    try:
+      session.delete(self)
+      session.commit()
+      return True
+    except IntegrityError, e:
+      self.errors['SQL'] = e.message
+      return False
+
   @classmethod
   def all(cls):
     return session.query(cls).all()

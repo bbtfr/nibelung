@@ -2,6 +2,7 @@ from plugin import Plugin
 from imp import find_module, load_module, acquire_lock, release_lock
 import os
 import sys
+import inspect
 
 class PluginManager(object):
   """Base class for plugin managers. Does not implement loadPlugins, so it
@@ -45,7 +46,6 @@ class PluginManager(object):
         break
     if not loaded:
       self.addPlugin(plug)
-      print 'Load Plugin:', plug.name
 
   def loadPlugins(self):
     pass
@@ -104,13 +104,22 @@ class DirectoryPluginManager(PluginManager):
           # to load from a new path
           del sys.modules[name]
         mod = load_module(name, fh, filename, desc)
+      except Exception as e:
+        print '  Failed to load plugin,', e
+        continue
       finally:
         if fh:
           fh.close()
         release_lock()
-      if hasattr(mod, "__all__"):
-        attrs = [getattr(mod, x) for x in mod.__all__]
-        for plug in attrs:
+      for name, plug in inspect.getmembers(mod):
+        if inspect.isclass(plug) and plug != Plugin:
           if not issubclass(plug, Plugin):
+            # print '  Failed to load plugin, %s is not subclass of Plugin' % name 
             continue
-          self._loadPlugin(plug())
+          inst = plug()
+          err = inst.validateOptionsFormat()
+          if err:
+            print '  Failed to load plugin,', err
+            continue
+          print '  Load Plugin:', inst.name
+          self._loadPlugin(inst)

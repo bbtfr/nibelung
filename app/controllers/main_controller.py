@@ -1,13 +1,13 @@
 from scan_controller import ScanController
 from audit_controller import AuditController
 from access_controller import AccessController
+from lib.select_mapper import SelectMapper
 from config.acl import acl, identity
 
 from PyQt4.QtGui import QDialog
-from PyQt4.QtCore import pyqtSignal
 from views.main_dialog import Ui_MainDialog
 
-class MainController(QDialog):
+class MainController(QDialog, SelectMapper):
   def __init__(self):
     QDialog.__init__(self)
 
@@ -15,32 +15,31 @@ class MainController(QDialog):
     self.ui = Ui_MainDialog()
     self.ui.setupUi(self)
 
+    self.ui.accessWidget = AccessController()
+    self.ui.auditWidget = AuditController()
+    self.ui.scanWidget = ScanController()
+
     # mapper of [slot, button]
     self.selectMapper = {
-      'access': [self.access, self.ui.accessButton],
-      'audit': [self.audit, self.ui.auditButton],
-      'scan': [self.scan, self.ui.scanButton],
+      'access': {
+        'button': self.ui.accessButton,
+        'widget': self.ui.accessWidget,
+      },
+      'audit': {
+        'button': self.ui.auditButton,
+        'widget': self.ui.auditWidget,
+      },
+      'scan': {
+        'button': self.ui.scanButton,
+        'widget': self.ui.scanWidget,
+      },
     }
-    self._select = None
 
     for key, value in self.selectMapper.iteritems():
-      value[1].clicked.connect(value[0])
+      value['widget'].hide()
+      self.ui.horizontalLayout.addWidget(value['widget'])
+      
+    # setup select mapper which defined in app/lib/select_mapper.py
+    self.setupSelectMapper(self.selectMapper)
+    
     self.select('scan')
-
-  def access(self):
-    self.select('access')
-
-  def audit(self):
-    self.select('audit')
-  
-  def scan(self):
-    self.select('scan')
-
-  def select(self, select):
-    print select, self._select
-    if self._select != select:
-      for key, value in self.selectMapper.iteritems():
-        if key != select:
-          value[1].setChecked(False)
-      self._select = select
-    self.selectMapper[select][1].setChecked(True)

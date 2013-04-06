@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'app/views/mainDialog.ui'
+# Form implementation generated from reading ui file 'app/views/main_dialog.ui'
 #
-# Created: Fri Apr  5 20:30:36 2013
+# Created: Sat Apr  6 12:22:18 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,6 +31,8 @@ class Ui_MainDialog(object):
         self.scrollAreaWidgetContents = QtGui.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 582, 340))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.scrollAreaWidgetContents)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.gridLayout.addWidget(self.scrollArea, 2, 1, 1, 4)
         self.auditButton = QtGui.QCommandLinkButton(MainDialog)

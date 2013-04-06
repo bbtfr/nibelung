@@ -9,49 +9,71 @@ class User(BaseModel, ResourceMixin):
 
   id = Column(Integer, primary_key=True)
   username = Column(String, unique=True, nullable=False)
-  password = Column(String(128), nullable=False)
+  encrypted_password = Column(String(128), nullable=False)
   salt = Column(String(10), nullable=False)
   _roles = Column('roles', String, nullable=False, default="")
   _current_user = None
 
-  def roles():
-    doc = "The roles property."
-    def fget(self):
-      if self._roles: return self._roles.split(",")
-      else: return []
-    def fset(self, value):
-      if type(value) == str: self._roles = value
-      elif type(value) == list: self._roles = ",".join(value)
-    return locals()
-  roles = property(**roles())
-
   def authenticate(self, password):
     if not self.salt: return False
-    if make_password(password, self.salt) == self.password:
+    if make_password(password, self.salt) == self.encrypted_password:
       self.__class__._current_user = self
       return True
     else:
       return False
 
+  @property
+  def roles(self):
+    if self._roles: return self._roles.split(",")
+    else: return []
+
+  @roles.setter
+  def roles(self, value):
+    if type(value) == str: self._roles = value
+    elif type(value) == list: self._roles = ",".join(value)
+
+  @property
+  def password(self):
+    return self._password
+
+  @password.setter
+  def password(self, password):
+    self._password = self.validate_password('password', password)
+    if not self.salt:
+      self.salt = random_characters(10)
+    self.encrypted_password = make_password(self.password, self.salt)
+  
+  @hybrid_property
+  def password_confirm(self):
+    return self._password_confirm
+
+  @password_confirm.setter
+  def password_confirm(self, password_confirm):
+    self._password_confirm = self.validate_password_confirm('password_confirm', password_confirm)
+
   @validates('username')
   def validate_username(self, key, value):
-    if not value: self.errors[key] = u'不能为空'
-    elif len(value) < 5: self.errors[key] = u'至少5个字符'
-    elif User.find_by_username(value) != None: self.errors[key] = u'用户%s已存在' % value
-    elif key in self.errors: del self.errors[key]
+    if key in self.errors: del self.errors[key]
+    if not value: self.errors[key] = u'用户名不能为空'
+    elif len(value) < 5: self.errors[key] = u'用户名至少5个字符'
+    elif not self.id and User.find_by_username(value) != None: 
+      self.errors[key] = u'用户%s已存在' % value
     return value
 
   @validates('password')
   def validate_password(self, key, value):
-    if not value: self.errors[key] = u'不能为空'
-    elif len(value) < 6: self.errors[key] = u'至少6个字符'
-    elif key in self.errors: del self.errors[key]
+    if key in self.errors: del self.errors[key]
+    if hasattr(self, key):
+      if not value: self.errors[key] = u'密码不能为空'
+      elif len(value) < 6: self.errors[key] = u'密码至少6个字符'
     return value
 
-  def before_save(self):
-    if not self.salt:
-      self.salt = random_characters(10)
-    self.password = make_password(self.password, self.salt)
+  @validates('password_confirm')
+  def validate_password_confirm(self, key, value):
+    if key in self.errors: del self.errors[key]
+    if value != self.password:
+      self.errors[key] = u'两次输入密码不一致'
+    return value
 
   # querying
   @classmethod
