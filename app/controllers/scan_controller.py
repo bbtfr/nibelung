@@ -1,10 +1,13 @@
+#coding=utf-8
+
 from datetime import datetime
 from lib.plugin_manager import DirectoryPluginManager
 from lib.select_mapper import SelectMapper
 from lib.form_generator import generateForm, getFormValue
+from config import session
 from models import *
 
-from PyQt4.QtGui import QWidget, QPushButton, QFormLayout, QRegExpValidator
+from PyQt4.QtGui import QWidget, QPushButton, QFormLayout, QMessageBox, QRegExpValidator
 from PyQt4.QtCore import pyqtSignal, QSignalMapper, SIGNAL
 from PyQt4.QtCore import QObject, QString, QRegExp
 from views.scan_widget import Ui_ScanWidget
@@ -59,7 +62,7 @@ class ScanController(QWidget, SelectMapper):
   def scan(self):
     # init scan model
     scan = Scan()
-    scan.scan_start_at = datetime.now()
+    scan.scan_started_at = datetime.now()
     scan.scan_by = User.current_user()
     for key, value in self.selectMapper.iteritems():
       for plug in value['plugins']:
@@ -70,8 +73,12 @@ class ScanController(QWidget, SelectMapper):
           finding.plugin_name = plug.name
           finding.plugin_group = plug.group
           finding.plugin_options = str(options)
-          print finding.message
-
-    scan.scan_finish_at = datetime.now()
+          scan.findings.append(finding)
+    scan.scan_finished_at = datetime.now()
     scan.findings_num = len(scan.findings)
-    scan.save()
+    try:
+      session.add(scan)
+      session.add_all(scan.findings)
+      session.commit()
+    except IntegrityError, e:
+      QMessageBox.information(self, u"SQL错误", u"扫描结果储存失败\n" + e.message)

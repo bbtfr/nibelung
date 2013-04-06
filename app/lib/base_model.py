@@ -8,6 +8,7 @@ from config import session
 BaseModel = declarative_base()
 
 class ResourceMixin(object):
+
   def __eq__(self, other):
     return hasattr(other, "id") and self.id == other.id
 
@@ -38,6 +39,13 @@ class ResourceMixin(object):
     except IntegrityError, e:
       self.errors['SQL'] = e.message
       return False
+
+  def full_error_messages(self, mapper={}):
+    # full_error_messages = []
+    # for key, value in self.errors.iteritems():
+    #   full_error_messages.append(mapper.get(key, key) + value)
+    # return "\n".join(full_error_messages)
+    return "\n".join(self.errors.values())
 
   @classmethod
   def all(cls):

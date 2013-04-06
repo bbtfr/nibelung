@@ -21,6 +21,7 @@ class SelectMapper:
 
   def select(self, select):
     select = unicode(select)
+    self.selectMapper[select]['button'].setChecked(True)
     if self._select == select: return
     if self._select:
       self.selectMapper[self._select]['button'].setChecked(False)
@@ -30,14 +31,13 @@ class SelectMapper:
         self.selectAllButton.setChecked(False)
       for key, value in self.selectMapper.iteritems():
         value['widget'].hide()
-    self.selectMapper[select]['button'].setChecked(True)
     self.selectMapper[select]['widget'].show()
     self._select = select
 
   def selectAll(self):
+    self.selectAllButton.setChecked(True)
     if self._select == None: return
     for key, value in self.selectMapper.iteritems():
       value['button'].setChecked(False)
       value['widget'].show()
-    self.selectAllButton.setChecked(True)
     self._select = None

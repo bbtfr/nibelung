@@ -15,6 +15,7 @@ class AccessController(QWidget):
     self.ui = Ui_AccessWidget()
     self.ui.setupUi(self)
 
+    self.ui.listWidget.doubleClicked.connect(self.edit)
     self.updateUserList()
 
     self.ui.addButton.clicked.connect(self.new)
@@ -25,6 +26,7 @@ class AccessController(QWidget):
     self.formDialog.ui = Ui_FormDialog()
     self.formDialog.ui.setupUi(self.formDialog)
     self.formDialog.ui.buttonBox.accepted.connect(self.commit)
+    self.formDialog.resize(250, 200)
 
     self.userRoleMapper = {
       u"用户": "staff",
@@ -44,38 +46,58 @@ class AccessController(QWidget):
   def new(self):
     setFormValue(self.userFormOptions, {})
     self.user = None
+    self.formDialog.setWindowTitle(u"创建用户")
     self.formDialog.show()
 
   def edit(self):
     if not self.currentSelectUser(): return
     formValue = {u"用户名": self.user.username, u"用户角色": self.user.roles}
     setFormValue(self.userFormOptions, formValue)
+    self.formDialog.setWindowTitle(u"编辑用户")
     self.formDialog.show()
 
   def commit(self):
     if self.user:
-      user = self.user
-      errorTitle = u"修改用户失败"
+      self.update()
     else:
-      user = User()
-      errorTitle = u"创建用户失败"
-    formValue = getFormValue(self.userFormOptions)
+      self.user = User()
+      self.create()
 
-    # set user fields
-    user.username = formValue[u"用户名"]
-    if formValue[u"密码"] or formValue[u"确认密码"]:
-      user.password = formValue[u"密码"]
-      user.password_confirm = formValue[u"确认密码"]
-    user.roles = self.userRoleMapper[formValue[u"用户角色"]]
-
+  def create(self):
+    self.parseFormValue()
     # save return True on success, False on failed
-    if user.save():
+    if self.user.save():
       self.updateUserList()
       QDialog.accept(self.formDialog)
     else:
-      errorMessage = "\n".join(user.errors.values())
-      QMessageBox.information(self, errorTitle, errorMessage)
+      QMessageBox.information(self, u"创建用户失败", self.user.full_error_messages())
       return
+
+  def update(self):
+    self.parseFormValue()
+    # save return True on success, False on failed
+    if self.user.save():
+      self.updateUserList()
+      QDialog.accept(self.formDialog)
+    else:
+      QMessageBox.information(self, u"编辑用户失败", self.user.full_error_messages())
+      return
+
+  def destroy(self):
+    if not self.currentSelectUser(): return
+    if QMessageBox.question(self, u"删除用户", u"您确定要删除用户%s？" % self.user.username,
+      QMessageBox.Ok | QMessageBox.Cancel) == QMessageBox.Ok:
+      self.user.destroy()
+    self.updateUserList()
+
+  def parseFormValue(self):
+    formValue = getFormValue(self.userFormOptions)
+    # set user fields
+    self.user.username = formValue[u"用户名"]
+    if formValue[u"密码"] or formValue[u"确认密码"]:
+      self.user.password = formValue[u"密码"]
+      self.user.password_confirm = formValue[u"确认密码"]
+    self.user.roles = self.userRoleMapper[formValue[u"用户角色"]]
 
   def updateUserList(self):
     self.user = None
@@ -84,13 +106,6 @@ class AccessController(QWidget):
     for user in self.allUsers:
       desciption = "%s (%s)" % (user.username, user._roles)
       self.ui.listWidget.addItem(desciption)
-
-  def destroy(self):
-    if not self.currentSelectUser(): return
-    if QMessageBox.question(self, u"删除用户", u"您确定要删除用户%s？" % self.user.username,
-      QMessageBox.Ok | QMessageBox.Cancel) == QMessageBox.Ok:
-      self.user.destroy()
-    self.updateUserList()
 
   def currentSelectUser(self):
     index = self.ui.listWidget.currentRow()
