@@ -14,4 +14,3 @@ class Scan(BaseModel, ResourceMixin):
   scan_by_id = Column(ForeignKey(User.id))
   scan_by = relationship(User, uselist=False)
   findings = relationship("Finding")
-  findings_num = Column(Integer, nullable=False)

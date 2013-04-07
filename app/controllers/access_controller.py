@@ -1,7 +1,7 @@
 #coding=utf-8
 
-from PyQt4.QtGui import QWidget, QDialog, QMessageBox
-from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt4.QtGui import QWidget, QDialog, QMessageBox, QTreeWidgetItem
+from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot, QStringList
 from lib.form_generator import *
 from views.access_widget import Ui_AccessWidget
 from views.form_dialog import Ui_FormDialog
@@ -15,8 +15,11 @@ class AccessController(QWidget):
     self.ui = Ui_AccessWidget()
     self.ui.setupUi(self)
 
-    self.ui.listWidget.doubleClicked.connect(self.edit)
-    self.updateUserList()
+    header = self.ui.treeWidget.header()
+    header.resizeSection(0, 60)
+    header.resizeSection(3, 130)
+
+    self.ui.treeWidget.doubleClicked.connect(self.edit)
 
     self.ui.addButton.clicked.connect(self.new)
     self.ui.editButton.clicked.connect(self.edit)
@@ -34,6 +37,10 @@ class AccessController(QWidget):
       u"管理员": "admin",
     }
 
+    self.userRoleReverseMapper = {}
+    for key, value in self.userRoleMapper.iteritems():
+      self.userRoleReverseMapper[value] = key
+
     self.userFormOptions = [
       {'title': u"用户名", 'type': String},
       {'title': u"密码", 'type': String},
@@ -43,6 +50,10 @@ class AccessController(QWidget):
 
     generateForm(self.formDialog.ui.formLayout, self.userFormOptions)
 
+  def show(self):
+    self.updateUserList()
+    QWidget.show(self)
+    
   def new(self):
     setFormValue(self.userFormOptions, {})
     self.user = None
@@ -101,16 +112,23 @@ class AccessController(QWidget):
 
   def updateUserList(self):
     self.user = None
-    self.allUsers = User.all()
-    self.ui.listWidget.clear()
-    for user in self.allUsers:
-      desciption = "%s (%s)" % (user.username, user._roles)
-      self.ui.listWidget.addItem(desciption)
+    self.allItemMapper = {}
+    self.ui.treeWidget.clear()
+    for user in User.all():
+      stringList = QStringList([
+        unicode(user.id),
+        unicode(user.username),
+        ", ".join([self.userRoleReverseMapper[role] for role in user.roles]),
+        user.created_at.strftime('%Y-%m-%d %H:%M'),
+        user.updated_at.strftime('%Y-%m-%d %H:%M'),
+      ])
+      item = QTreeWidgetItem(self.ui.treeWidget, stringList)
+      self.allItemMapper[item] = user
 
   def currentSelectUser(self):
-    index = self.ui.listWidget.currentRow()
-    if index < 0:
+    item = self.ui.treeWidget.currentItem()
+    if not item:
       QMessageBox.information(self, u"未选中用户", u"请先选中一个用户！")
       return None
-    self.user = self.allUsers[index]
+    self.user = self.allItemMapper[item]
     return self.user

@@ -14,6 +14,13 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="3">
+    <widget class="QPushButton" name="deleteButton">
+     <property name="text">
+      <string>删除</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -27,13 +34,6 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="addButton">
-     <property name="text">
-      <string>添加</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="2">
     <widget class="QPushButton" name="editButton">
      <property name="text">
@@ -41,15 +41,41 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="3">
-    <widget class="QPushButton" name="deleteButton">
+   <item row="1" column="1">
+    <widget class="QPushButton" name="addButton">
      <property name="text">
-      <string>删除</string>
+      <string>添加</string>
      </property>
     </widget>
    </item>
    <item row="0" column="0" colspan="4">
-    <widget class="QListWidget" name="listWidget"/>
+    <widget class="QTreeWidget" name="treeWidget">
+     <column>
+      <property name="text">
+       <string>用户ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>用户名</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>角色</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>创建时间</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>更新时间</string>
+      </property>
+     </column>
+    </widget>
    </item>
   </layout>
  </widget>

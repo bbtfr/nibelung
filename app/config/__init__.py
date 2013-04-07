@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 
 base_dir =  os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 database_path = os.path.join(base_dir, 'db', 'database.db')

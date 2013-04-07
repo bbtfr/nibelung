@@ -4,7 +4,7 @@ from datetime import datetime
 from lib.plugin_manager import DirectoryPluginManager
 from lib.select_mapper import SelectMapper
 from lib.form_generator import generateForm, getFormValue
-from config import session
+from config import session, IntegrityError
 from models import *
 
 from PyQt4.QtGui import QWidget, QPushButton, QFormLayout, QMessageBox, QRegExpValidator
@@ -69,13 +69,14 @@ class ScanController(QWidget, SelectMapper):
         options = getFormValue(plug.options)
         for ret in plug.execute(options):
           finding = Finding(**ret)
+          if not finding.name: 
+            finding.name = plug.name
           finding.scan = scan
           finding.plugin_name = plug.name
           finding.plugin_group = plug.group
           finding.plugin_options = str(options)
           scan.findings.append(finding)
     scan.scan_finished_at = datetime.now()
-    scan.findings_num = len(scan.findings)
     try:
       session.add(scan)
       session.add_all(scan.findings)

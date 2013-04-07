@@ -1,4 +1,5 @@
 # for options' (type: widget) Mapper
+from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QSpinBox, QDoubleSpinBox, QLineEdit, QPlainTextEdit
 from PyQt4.QtGui import QCheckBox, QComboBox, QTimeEdit, QDateEdit, QDateTimeEdit
 from plugin import *
@@ -21,23 +22,23 @@ def generateForm(layout, options):
   """
   # config all plugins' options
   for option in options:
-    subWidget = widgetMapper[option['type']]()
-    layout.addRow(option['title'], subWidget)
+    widget = widgetMapper[option['type']]()
+    layout.addRow(option['title'], widget)
     if option['type'] in (Integer, Float):
       if option.has_key('minValue'):
-        subWidget.setMinimum(option['minValue'])
+        widget.setMinimum(option['minValue'])
       if option.has_key('maxValue'):
-        subWidget.setMaximum(option['maxValue'])
+        widget.setMaximum(option['maxValue'])
     if option['type'] == List:
-      subWidget.addItems(option['list'])
+      widget.addItems(option['list'])
     if option['type'] in ('time', 'date', 'datetime'):
       if option.has_key('minValue'):
-        subWidget.setMinimumDateTime(option['minValue'])
+        widget.setMinimumDateTime(option['minValue'])
       if option.has_key('maxValue'):
-        subWidget.setMaximumDateTime(option['maxValue'])
+        widget.setMaximumDateTime(option['maxValue'])
     if option.has_key('tooltip'):
-      subWidget.setToolTip(option['tooltip'])
-    option['widget'] = subWidget
+      widget.setToolTip(option['tooltip'])
+    option['widget'] = widget
 
 def getFormValue(options):
   formValue = {}
@@ -67,4 +68,23 @@ def setFormValue(options, formValue, cleanForm=True):
         option['widget'].setCurrentIndex(index)
     else:
       option['widget'].setText(value)
-  return formValue
+
+def generateDetailForm(layout, options):
+  """options should include key 'title'
+     same as plugin options
+  """
+  # config all plugins' options
+  for option in options:
+    if option.has_key('header'):
+      layout.addRow(QLabel("<strong>%s</strong>" % option['header']))
+    else:
+      widget = QLabel()
+      widget.setWordWrap(True)
+      layout.addRow(option['title'], widget)
+      option['widget'] = widget
+
+def setDetailFormValue(options, formValue):
+  for option in options:
+    if option.has_key('title') and formValue.has_key(option['title']):
+      value = unicode(formValue[option['title']])
+      option['widget'].setText(value)
